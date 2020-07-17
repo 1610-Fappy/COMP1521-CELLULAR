@@ -142,8 +142,14 @@ loop_cond:
 	bgt		$s4, $s2, loop_end									# if (g > n_generations) goto loop_end
 
 loop_main:
+
+	sub		$sp, $sp, 4											# $sp = $sp - 4
+	sw		$ra, 0($sp)											# saves return onto stack
 	
 	jal		run_generation										# jump to run_generation and save position to $ra
+	
+	lw		$ra, 0($sp)											# recover $ra from stack
+	add		$sp, $sp, 4											# move stack pointer back to what it was
 	
 
 loop_increment:
@@ -165,7 +171,13 @@ reverse_loop_cond:
 
 reverse_loop_body:
 
+	sub		$sp, $sp, 4											# $sp = $sp - 4
+	sw		$ra, 0($sp)											# saves return onto stack
+
 	jal		print_generation									# print_generation(world_size, g)
+
+	lw		$ra, 0($sp)											# recover $ra from stack
+	add		$sp, $sp, 4											# move stack pointer back to what it was
 
 reverse_loop_decrement:
 
@@ -175,8 +187,8 @@ reverse_loop_decrement:
 
 reverse_loop_end:
 
-	li		$v0, 10													#FIX??? return 1
-	syscall
+	li	$v0, 0													# return 0
+	jr	$ra
 
 not_reverse:
 
@@ -190,7 +202,13 @@ not_reverse_loop_cond:
 
 not_reverse_loop_body:
 
+	sub		$sp, $sp, 4											# $sp = $sp - 4
+	sw		$ra, 0($sp)											# saves return onto stack
+
 	jal		print_generation									# print_generation(world_size, g)
+
+	lw		$ra, 0($sp)											# recover $ra from stack
+	add		$sp, $sp, 4											# move stack pointer back to what it was
 
 not_reverse_loop_increment:
 
@@ -200,8 +218,8 @@ not_reverse_loop_increment:
 
 not_reverse_loop_end:
 
-	li		$v0, 10													#FIX??? return 1
-	syscall
+	li	$v0, 0													# return 0
+	jr	$ra
 
 invalid_generations:
 
@@ -209,9 +227,8 @@ invalid_generations:
 	la		$a0, error_n_generations
 	syscall
 																
-	li	$v0, 10													#FIX??? return 1
-	syscall
-
+	li	$v0, 1													# return 1
+	jr	$ra
 
 invalid_rule:
 	
@@ -220,8 +237,8 @@ invalid_rule:
 	la		$a0, error_rule
 	syscall
 																
-	li	$v0, 10													#FIX??? return 1
-	syscall
+	li	$v0, 1													# return 1
+	jr	$ra
 
 invalid_world_size:
 		
@@ -240,9 +257,8 @@ invalid_world_size:
 	la		$a0, error_world_size
 	syscall
 																
-	li	$v0, 10													#FIX??? return 1
-	syscall
-
+	li	$v0, 1													# return 1
+	jr	$ra
 
 
 	#
@@ -392,7 +408,7 @@ gen_loop_increment:
 
 gen_loop_end:
 
-	j		loop_increment
+	jr		$ra
 
 
 	#
