@@ -145,6 +145,10 @@ loop_main:
 
 	sub		$sp, $sp, 4											# $sp = $sp - 4
 	sw		$ra, 0($sp)											# saves return onto stack
+
+	move	$a0, $s0											# parameters for run_generation
+	move 	$a1, $s1
+	move	$a2, $s4
 	
 	jal		run_generation										# jump to run_generation and save position to $ra
 	
@@ -276,9 +280,9 @@ invalid_world_size:
 	# $t6 used for storing which_generation - 1
 	# $t7 used for storing state
 	#
-	# $s0 passed in for world_size
-	# $s1 passed in for rule
-	# $s4 passed in for which_generation
+	# $a0 passed in for world_size
+	# $a1 passed in for rule
+	# $a2 passed in for which_generation
 	#
 	# YOU SHOULD ALSO NOTE WHICH REGISTERS DO NOT HAVE THEIR
 	# ORIGINAL VALUE WHEN `run_generation' FINISHES
@@ -292,9 +296,9 @@ gen_loop_init:
 
 gen_loop_cond:
 
-	bge		$t1, $s0, gen_loop_end								# if $t1 >= $s0 then gen_loop_end
+	bge		$t1, $a0, gen_loop_end								# if $t1 >= $a0 then gen_loop_end
 
-	move	$t6, $s4											# $t6 = $s4 - 1 = which_generation - 1
+	move	$t6, $a2											# $t6 = $a2 - 1 = which_generation - 1
 	addi	$t6, -1
 
 gen_loop_main:
@@ -341,7 +345,7 @@ x_not_pos:
 
 	li		$t2, 0												# $t2 = int right = 0
 
-	move	$t5, $s0											# $t5 = $s0 = world_size
+	move	$t5, $a0											# $t5 = $a0 = world_size
 	addi	$t5, -1												# $t5 = world_size - 1
 
 	bge		$t1, $t5, x_at_end									# if $t1 >= $t5 then x_at_end
@@ -367,13 +371,13 @@ x_at_end:
 
 	sllv	$t3, $t3, $t7										# $t3 = $t3 << $t7 = bit << state
 
-	and		$t4, $s1, $t3										# $t4 = $s1 & $t3 = rule & bit
+	and		$t4, $a1, $t3										# $t4 = $a1 & $t3 = rule & bit
 
 	beqz	$t4, set_equal_zero									# if (!set) goto set_equal_zero
 
-	move	$t3, $s4											# $t3 = $s4 = which_generation
+	move	$t3, $a2											# $t3 = $a2 = which_generation
 	mul		$t3, $t3, MAX_WORLD_SIZE
-	add 	$t3, $t3, $t1										# $t3 = $s4 * $t1 = [which_generation][x]
+	add 	$t3, $t3, $t1										# $t3 = $a2 * $t1 = [which_generation][x]
 	
 	la		$t5, cells											# loads address for start of cells array
 	add		$t3, $t5, $t3										# adjusts memory location to correct byte -> cells[which_generation][x]
@@ -386,10 +390,10 @@ x_at_end:
 
 set_equal_zero:
 
-	move	$t3, $s4											# $t3 = $s4 = which_generation
+	move	$t3, $a2											# $t3 = $a2 = which_generation
 	mul 	$t3, $t3, MAX_WORLD_SIZE
 
-	add 	$t3, $t3, $t1										# $t3 = $s4 * $t1 = [which_generation][x]
+	add 	$t3, $t3, $t1										# $t3 = $a2 * $t1 = [which_generation][x]
 	
 	la		$t5, cells											# loads address for start of cells array
 	add		$t3, $t5, $t3										# adjusts memory location to correct byte -> cells[which_generation][x]
